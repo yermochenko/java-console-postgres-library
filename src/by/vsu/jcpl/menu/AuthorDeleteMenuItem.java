@@ -6,8 +6,13 @@ import by.vsu.jcpl.EntityValidationException;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-public class AuthorDeleteMenuItem {
-	public static void activate(AuthorDatabaseMapper authorDatabaseMapper) throws SQLException, EntityValidationException {
+public class AuthorDeleteMenuItem extends AuthorMenuItem {
+	public AuthorDeleteMenuItem(AuthorDatabaseMapper authorDatabaseMapper) {
+		super(authorDatabaseMapper);
+	}
+
+	@Override
+	public boolean activate() throws SQLException, EntityValidationException {
 		Scanner console = new Scanner(System.in);
 		System.out.println("\n==<[ DELETING INFORMATION ABOUT AUTHOR ]>==\n");
 		System.out.print("Enter author's identifier (ID): ");
@@ -17,7 +22,8 @@ public class AuthorDeleteMenuItem {
 		} catch(NumberFormatException e) {
 			throw new EntityValidationException("Identifier should be integer");
 		}
-		authorDatabaseMapper.delete(id);
+		getAuthorDatabaseMapper().delete(id);
 		System.out.println("Information about author was successfully deleted");
+		return true;
 	}
 }

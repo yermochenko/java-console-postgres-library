@@ -7,8 +7,13 @@ import by.vsu.jcpl.EntityValidationException;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-public class AuthorAddMenuItem {
-	public static void activate(AuthorDatabaseMapper authorDatabaseMapper) throws SQLException, EntityValidationException {
+public class AuthorAddMenuItem extends AuthorMenuItem {
+	public AuthorAddMenuItem(AuthorDatabaseMapper authorDatabaseMapper) {
+		super(authorDatabaseMapper);
+	}
+
+	@Override
+	public boolean activate() throws SQLException, EntityValidationException {
 		Scanner console = new Scanner(System.in);
 		System.out.println("\n==<[ ADDING OF NEW AUTHOR ]>==\n");
 		Author author = new Author();
@@ -45,7 +50,8 @@ public class AuthorAddMenuItem {
 		if(author.getDeathYear() != null && author.getBirthYear() > author.getDeathYear()) {
 			throw new EntityValidationException("Birth year should be earlier than death year");
 		}
-		Integer id = authorDatabaseMapper.create(author);
+		Integer id = getAuthorDatabaseMapper().create(author);
 		System.out.printf("Author successfully added with identifier [%04d]\n", id);
+		return true;
 	}
 }

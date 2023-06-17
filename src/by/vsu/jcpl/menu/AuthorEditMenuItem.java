@@ -7,8 +7,13 @@ import by.vsu.jcpl.EntityValidationException;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-public class AuthorEditMenuItem {
-	public static void activate(AuthorDatabaseMapper authorDatabaseMapper) throws SQLException, EntityValidationException {
+public class AuthorEditMenuItem extends AuthorMenuItem {
+	public AuthorEditMenuItem(AuthorDatabaseMapper authorDatabaseMapper) {
+		super(authorDatabaseMapper);
+	}
+
+	@Override
+	public boolean activate() throws SQLException, EntityValidationException {
 		Scanner console = new Scanner(System.in);
 		System.out.println("\n==<[ UPDATING INFORMATION ABOUT AUTHOR ]>==\n");
 		System.out.print("Enter author's identifier (ID): ");
@@ -18,7 +23,7 @@ public class AuthorEditMenuItem {
 		} catch(NumberFormatException e) {
 			throw new EntityValidationException("Identifier should be integer");
 		}
-		Author author = authorDatabaseMapper.readById(id);
+		Author author = getAuthorDatabaseMapper().readById(id);
 		boolean isChanged = false;
 		System.out.printf("Author's name: %s\n", author.getName());
 		System.out.print("Enter new name (or press \"Enter\" to leave existing name): ");
@@ -69,10 +74,11 @@ public class AuthorEditMenuItem {
 			throw new EntityValidationException("Birth year should be earlier than death year");
 		}
 		if(isChanged) {
-			authorDatabaseMapper.update(author);
+			getAuthorDatabaseMapper().update(author);
 			System.out.println("Information about author was successfully updated");
 		} else {
 			System.out.println("Nothing changed");
 		}
+		return true;
 	}
 }

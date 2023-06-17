@@ -6,10 +6,15 @@ import by.vsu.jcpl.AuthorDatabaseMapper;
 import java.sql.SQLException;
 import java.util.List;
 
-public class AuthorListMenuItem {
-	public static void activate(AuthorDatabaseMapper authorDatabaseMapper) throws SQLException {
+public class AuthorListMenuItem extends AuthorMenuItem {
+	public AuthorListMenuItem(AuthorDatabaseMapper authorDatabaseMapper) {
+		super(authorDatabaseMapper);
+	}
+
+	@Override
+	public boolean activate() throws SQLException {
 		System.out.println("\n==<[ Authors ]>==\n");
-		List<Author> authors = authorDatabaseMapper.readAll();
+		List<Author> authors = getAuthorDatabaseMapper().readAll();
 		for(Author author : authors) {
 			System.out.printf("[%04d] %s %s ", author.getId(), author.getName(), author.getSurname());
 			if(author.getDeathYear() != null) {
@@ -18,5 +23,6 @@ public class AuthorListMenuItem {
 				System.out.printf("(%d - ...)\n", author.getBirthYear());
 			}
 		}
+		return true;
 	}
 }

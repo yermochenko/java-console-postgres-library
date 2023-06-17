@@ -28,11 +28,11 @@ public class Main {
 				try {
 					int menuItem = Integer.parseInt(console.nextLine());
 					switch(menuItem) {
-						case 1 -> AuthorListMenuItem.activate(new AuthorDatabaseMapper(connection));
-						case 2 -> AuthorAddMenuItem.activate(new AuthorDatabaseMapper(connection));
-						case 3 -> AuthorEditMenuItem.activate(new AuthorDatabaseMapper(connection));
-						case 4 -> AuthorDeleteMenuItem.activate(new AuthorDatabaseMapper(connection));
-						case 5 -> work = ExitMenuItem.activate();
+						case 1 -> new AuthorListMenuItem(new AuthorDatabaseMapper(connection)).activate();
+						case 2 -> new AuthorAddMenuItem(new AuthorDatabaseMapper(connection)).activate();
+						case 3 -> new AuthorEditMenuItem(new AuthorDatabaseMapper(connection)).activate();
+						case 4 -> new AuthorDeleteMenuItem(new AuthorDatabaseMapper(connection)).activate();
+						case 5 -> work = new ExitMenuItem().activate();
 						default -> throw new IllegalArgumentException();
 					}
 					System.out.println("\n******************************\n");
