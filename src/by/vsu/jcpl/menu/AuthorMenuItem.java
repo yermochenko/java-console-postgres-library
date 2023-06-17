@@ -1,6 +1,6 @@
 package by.vsu.jcpl.menu;
 
-import by.vsu.jcpl.AuthorDatabaseMapper;
+import by.vsu.jcpl.orm.AuthorDatabaseMapper;
 
 abstract public class AuthorMenuItem extends NamedMenuItem {
 	private final AuthorDatabaseMapper authorDatabaseMapper;

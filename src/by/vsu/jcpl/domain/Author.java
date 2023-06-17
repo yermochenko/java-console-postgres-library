@@ -1,19 +1,10 @@
-package by.vsu.jcpl;
+package by.vsu.jcpl.domain;
 
-public class Author {
-	private Integer id;
+public class Author extends Entity {
 	private String surname;
 	private String name;
 	private Integer birthYear;
 	private Integer deathYear;
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
 
 	public String getSurname() {
 		return surname;

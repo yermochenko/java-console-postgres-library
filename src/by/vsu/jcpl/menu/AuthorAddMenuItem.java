@@ -1,7 +1,7 @@
 package by.vsu.jcpl.menu;
 
-import by.vsu.jcpl.Author;
-import by.vsu.jcpl.AuthorDatabaseMapper;
+import by.vsu.jcpl.domain.Author;
+import by.vsu.jcpl.orm.AuthorDatabaseMapper;
 import by.vsu.jcpl.EntityValidationException;
 
 import java.sql.SQLException;

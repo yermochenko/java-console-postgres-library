@@ -1,15 +1,15 @@
-package by.vsu.jcpl;
+package by.vsu.jcpl.orm;
+
+import by.vsu.jcpl.domain.Author;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class AuthorDatabaseMapper {
-	private final Connection connection;
-
+public class AuthorDatabaseMapper extends EntityDatabaseMapper {
 	public AuthorDatabaseMapper(Connection connection) {
-		this.connection = connection;
+		super(connection);
 	}
 
 	public List<Author> readAll() throws SQLException {
@@ -17,7 +17,7 @@ public class AuthorDatabaseMapper {
 		Statement statement = null;
 		ResultSet resultSet = null;
 		try {
-			statement = connection.createStatement();
+			statement = getConnection().createStatement();
 			resultSet = statement.executeQuery(sql);
 			List<Author> authors = new ArrayList<>();
 			while(resultSet.next()) {
@@ -35,7 +35,7 @@ public class AuthorDatabaseMapper {
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
 		try {
-			statement = connection.prepareStatement(sql);
+			statement = getConnection().prepareStatement(sql);
 			statement.setInt(1, id);
 			resultSet = statement.executeQuery();
 			if(resultSet.next()) {
@@ -54,7 +54,7 @@ public class AuthorDatabaseMapper {
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
 		try {
-			statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			statement = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			fillStatement(statement, author);
 			statement.executeUpdate();
 			resultSet = statement.getGeneratedKeys(); // receiving of all generated primary keys
@@ -70,7 +70,7 @@ public class AuthorDatabaseMapper {
 		String sql = "UPDATE \"author\" SET \"name\" = ?, \"surname\" = ?, \"birth_year\" = ?, \"death_year\" = ? WHERE \"id\" = ?";
 		PreparedStatement statement = null;
 		try {
-			statement = connection.prepareStatement(sql);
+			statement = getConnection().prepareStatement(sql);
 			fillStatement(statement, author);
 			statement.setInt(5, author.getId());
 			statement.executeUpdate();
@@ -83,7 +83,7 @@ public class AuthorDatabaseMapper {
 		String sql = "DELETE FROM \"author\" WHERE \"id\" = ?";
 		PreparedStatement statement = null;
 		try {
-			statement = connection.prepareStatement(sql);
+			statement = getConnection().prepareStatement(sql);
 			statement.setInt(1, id);
 			statement.executeUpdate();
 		} finally {

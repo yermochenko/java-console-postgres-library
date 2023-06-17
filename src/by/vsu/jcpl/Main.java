@@ -1,6 +1,7 @@
 package by.vsu.jcpl;
 
 import by.vsu.jcpl.menu.*;
+import by.vsu.jcpl.orm.AuthorDatabaseMapper;
 
 import java.sql.*;
 import java.util.*;
