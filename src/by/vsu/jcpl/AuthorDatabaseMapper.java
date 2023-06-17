@@ -79,6 +79,18 @@ public class AuthorDatabaseMapper {
 		}
 	}
 
+	public void delete(Integer id) throws SQLException {
+		String sql = "DELETE FROM \"author\" WHERE \"id\" = ?";
+		PreparedStatement statement = null;
+		try {
+			statement = connection.prepareStatement(sql);
+			statement.setInt(1, id);
+			statement.executeUpdate();
+		} finally {
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+		}
+	}
+
 	private void fillStatement(PreparedStatement statement, Author author) throws SQLException {
 		statement.setString(1, author.getName());
 		statement.setString(2, author.getSurname());

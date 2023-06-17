@@ -19,7 +19,8 @@ public class Main {
 				System.out.println("| 1) Reading of authors list           |");
 				System.out.println("| 2) Adding of new author              |");
 				System.out.println("| 3) Updating information about author |");
-				System.out.println("| 4) Exit                              |");
+				System.out.println("| 4) Deleting information about author |");
+				System.out.println("| 5) Exit                              |");
 				System.out.println("+--------------------------------------+");
 				System.out.print("\nEnter menu item number: ");
 				try {
@@ -143,6 +144,18 @@ public class Main {
 							}
 						}
 						case 4 -> {
+							System.out.println("\n==<[ DELETING INFORMATION ABOUT AUTHOR ]>==\n");
+							System.out.print("Enter author's identifier (ID): ");
+							int id;
+							try {
+								id = Integer.parseInt(console.nextLine());
+							} catch(NumberFormatException e) {
+								throw new EntityValidationException("Identifier should be integer");
+							}
+							new AuthorDatabaseMapper(connection).delete(id);
+							System.out.println("Information about author was successfully deleted");
+						}
+						case 5 -> {
 							System.out.print("\nDo you want to exit? (y/n): ");
 							if(Set.of("y", "yes").contains(console.nextLine().trim().toLowerCase())) {
 								System.out.println("Good bye");
