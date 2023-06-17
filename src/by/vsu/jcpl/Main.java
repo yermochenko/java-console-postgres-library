@@ -12,31 +12,31 @@ public class Main {
 			Class.forName("org.postgresql.Driver");
 			connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/book_catalog_db", "root", "root");
 			System.out.println("Connecting to database establish successfully");
+			AuthorDatabaseMapper authorDatabaseMapper = new AuthorDatabaseMapper(connection);
+			List<MenuItem> menuItems = new ArrayList<>();
+			menuItems.add(new AuthorListMenuItem("Reading of authors list", authorDatabaseMapper));
+			menuItems.add(new AuthorAddMenuItem("Adding of new author", authorDatabaseMapper));
+			menuItems.add(new AuthorEditMenuItem("Updating information about author", authorDatabaseMapper));
+			menuItems.add(new AuthorDeleteMenuItem("Deleting information about author", authorDatabaseMapper));
+			menuItems.add(new ExitMenuItem("Exit"));
+			int width = menuItems.stream().map(item -> item.title().length()).max(Integer::compareTo).get();
+			String delimiter = "+" + String.join("", Collections.nCopies(width + 5, "-")) + "+";
 			Scanner console = new Scanner(System.in);
 			boolean work = true;
 			while(work) {
-				System.out.println("+--------------------------------------+");
-				System.out.println("|                 MENU                 |");
-				System.out.println("+--------------------------------------+");
-				System.out.println("| 1) Reading of authors list           |");
-				System.out.println("| 2) Adding of new author              |");
-				System.out.println("| 3) Updating information about author |");
-				System.out.println("| 4) Deleting information about author |");
-				System.out.println("| 5) Exit                              |");
-				System.out.println("+--------------------------------------+");
+				System.out.println(delimiter);
+				System.out.printf("| %-" + (width + 4) + "s|\n", "MENU");
+				System.out.println(delimiter);
+				int n = 1;
+				for(MenuItem menuItem : menuItems) {
+					System.out.printf("| %d) %-" + width + "s |\n", n++, menuItem.title());
+				}
+				System.out.println(delimiter);
 				System.out.print("\nEnter menu item number: ");
 				try {
-					int menuItem = Integer.parseInt(console.nextLine());
-					switch(menuItem) {
-						case 1 -> new AuthorListMenuItem(new AuthorDatabaseMapper(connection)).activate();
-						case 2 -> new AuthorAddMenuItem(new AuthorDatabaseMapper(connection)).activate();
-						case 3 -> new AuthorEditMenuItem(new AuthorDatabaseMapper(connection)).activate();
-						case 4 -> new AuthorDeleteMenuItem(new AuthorDatabaseMapper(connection)).activate();
-						case 5 -> work = new ExitMenuItem().activate();
-						default -> throw new IllegalArgumentException();
-					}
+					work = menuItems.get(Integer.parseInt(console.nextLine()) - 1).activate();
 					System.out.println("\n******************************\n");
-				} catch(IllegalArgumentException e) {
+				} catch(IndexOutOfBoundsException | NumberFormatException e) {
 					System.out.println("Incorrect menu item number");
 				} catch(EntityValidationException e) {
 					System.out.println(e.getMessage());

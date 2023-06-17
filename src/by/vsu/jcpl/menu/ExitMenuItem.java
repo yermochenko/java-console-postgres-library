@@ -2,7 +2,11 @@ package by.vsu.jcpl.menu;
 
 import java.util.Set;
 
-public class ExitMenuItem implements MenuItem {
+public class ExitMenuItem extends NamedMenuItem {
+	public ExitMenuItem(String title) {
+		super(title);
+	}
+
 	@Override
 	public boolean activate() {
 		System.out.print("\nDo you want to exit? (y/n): ");

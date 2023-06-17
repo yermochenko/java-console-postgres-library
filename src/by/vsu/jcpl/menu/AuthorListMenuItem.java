@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class AuthorListMenuItem extends AuthorMenuItem {
-	public AuthorListMenuItem(AuthorDatabaseMapper authorDatabaseMapper) {
-		super(authorDatabaseMapper);
+	public AuthorListMenuItem(String title, AuthorDatabaseMapper authorDatabaseMapper) {
+		super(title, authorDatabaseMapper);
 	}
 
 	@Override

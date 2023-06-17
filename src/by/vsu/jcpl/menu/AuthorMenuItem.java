@@ -2,10 +2,11 @@ package by.vsu.jcpl.menu;
 
 import by.vsu.jcpl.AuthorDatabaseMapper;
 
-abstract public class AuthorMenuItem implements MenuItem {
+abstract public class AuthorMenuItem extends NamedMenuItem {
 	private final AuthorDatabaseMapper authorDatabaseMapper;
 
-	public AuthorMenuItem(AuthorDatabaseMapper authorDatabaseMapper) {
+	protected AuthorMenuItem(String title, AuthorDatabaseMapper authorDatabaseMapper) {
+		super(title);
 		this.authorDatabaseMapper = authorDatabaseMapper;
 	}
 

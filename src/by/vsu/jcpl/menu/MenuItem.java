@@ -9,4 +9,6 @@ public interface MenuItem {
 	Scanner console = new Scanner(System.in);
 
 	boolean activate() throws SQLException, EntityValidationException;
+
+	String title();
 }

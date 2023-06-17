@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 public class AuthorDeleteMenuItem extends AuthorMenuItem {
-	public AuthorDeleteMenuItem(AuthorDatabaseMapper authorDatabaseMapper) {
-		super(authorDatabaseMapper);
+	public AuthorDeleteMenuItem(String title, AuthorDatabaseMapper authorDatabaseMapper) {
+		super(title, authorDatabaseMapper);
 	}
 
 	@Override

@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 public class AuthorAddMenuItem extends AuthorMenuItem {
-	public AuthorAddMenuItem(AuthorDatabaseMapper authorDatabaseMapper) {
-		super(authorDatabaseMapper);
+	public AuthorAddMenuItem(String title, AuthorDatabaseMapper authorDatabaseMapper) {
+		super(title, authorDatabaseMapper);
 	}
 
 	@Override
