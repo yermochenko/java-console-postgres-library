@@ -1,9 +1,7 @@
 package by.vsu.jcpl;
 
 import java.sql.*;
-import java.util.Objects;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class Main {
 	public static void main(String[] args) {
@@ -31,24 +29,34 @@ public class Main {
 							Statement statement = null;
 							ResultSet resultSet = null;
 							try {
+								/* Begin of block for reading information from database */
 								statement = connection.createStatement();
 								resultSet = statement.executeQuery("SELECT \"id\", \"surname\", \"name\", \"birth_year\", \"death_year\" FROM \"author\"");
+								List<Author> authors = new ArrayList<>();
 								while(resultSet.next()) {
-									Integer id = resultSet.getInt("id");
-									String surname = resultSet.getString("surname");
-									String name = resultSet.getString("name");
-									Integer birthYear = resultSet.getInt("birth_year");
+									Author author = new Author();
+									author.setId(resultSet.getInt("id"));
+									author.setSurname(resultSet.getString("surname"));
+									author.setName(resultSet.getString("name"));
+									author.setBirthYear(resultSet.getInt("birth_year"));
 									Integer deathYear = resultSet.getInt("death_year");
-									if(resultSet.wasNull()) {
-										deathYear = null;
+									if(!resultSet.wasNull()) {
+										author.setDeathYear(deathYear);
 									}
-									System.out.printf("[%04d] %s %s ", id, name, surname);
-									if(deathYear != null) {
-										System.out.printf("(%d - %d)\n", birthYear, deathYear);
+									authors.add(author);
+								}
+								/* End of block for reading information from database */
+
+								/* Begin of block for printing information to screen */
+								for(Author author : authors) {
+									System.out.printf("[%04d] %s %s ", author.getId(), author.getName(), author.getSurname());
+									if(author.getDeathYear() != null) {
+										System.out.printf("(%d - %d)\n", author.getBirthYear(), author.getDeathYear());
 									} else {
-										System.out.printf("(%d - ...)\n", birthYear);
+										System.out.printf("(%d - ...)\n", author.getBirthYear());
 									}
 								}
+								/* End of block for printing information to screen */
 							} catch(SQLException e) {
 								System.out.println("Error working with database");
 								e.printStackTrace();
@@ -63,48 +71,51 @@ public class Main {
 							PreparedStatement statement = null;
 							ResultSet resultSet = null;
 							try {
-								statement = connection.prepareStatement("INSERT INTO \"author\" (\"name\", \"surname\", \"birth_year\", \"death_year\") VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+								/* Begin of block for reading information from keyboard */
+								Author author = new Author();
 								System.out.print("Enter author's name: ");
 								String name = console.nextLine();
-								if(name.isBlank()) {
-									System.out.println("Name shouldn't be empty");
-									break;
+								if(!name.isBlank()) {
+									author.setName(name);
+								} else {
+									throw new EntityValidationException("Name shouldn't be empty");
 								}
 								System.out.print("Enter author's surname: ");
 								String surname = console.nextLine();
-								if(surname.isBlank()) {
-									System.out.println("Surname shouldn't be empty");
-									break;
+								if(!surname.isBlank()) {
+									author.setSurname(surname);
+								} else {
+									throw new EntityValidationException("Surname shouldn't be empty");
 								}
 								System.out.print("Enter author's birth year: ");
-								int birthYear;
+								String birthYear = console.nextLine();
 								try {
-									birthYear = Integer.parseInt(console.nextLine());
+									author.setBirthYear(Integer.parseInt(birthYear));
 								} catch(NumberFormatException e) {
-									System.out.println("Birth year shouldn't be empty and should be integer");
-									break;
+									throw new EntityValidationException("Birth year shouldn't be empty and should be integer");
 								}
 								System.out.print("Enter author's death year if author is dead or press \"Enter\" if author is alive: ");
-								Integer deathYear = null;
-								String deathYearStr = console.nextLine();
-								if(!deathYearStr.isBlank()) {
+								String deathYear = console.nextLine();
+								if(!deathYear.isBlank()) {
 									try {
-										deathYear = Integer.valueOf(deathYearStr);
+										author.setDeathYear(Integer.valueOf(deathYear));
 									} catch(NumberFormatException e) {
-										System.out.println("Death year should be integer");
-										break;
+										throw new EntityValidationException("Death year should be integer");
 									}
 								}
-								if(deathYear != null && birthYear > deathYear) {
-									System.out.println("Birth year should be earlier than death year");
-									break;
+								if(author.getDeathYear() != null && author.getBirthYear() > author.getDeathYear()) {
+									throw new EntityValidationException("Birth year should be earlier than death year");
 								}
+								/* End of block for reading information from keyboard */
+
+								/* Begin of block for saving information into database */
+								statement = connection.prepareStatement("INSERT INTO \"author\" (\"name\", \"surname\", \"birth_year\", \"death_year\") VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 								/* Substitution of necessary data into the prepared statement */
-								statement.setString(1, name);
-								statement.setString(2, surname);
-								statement.setInt(3, birthYear);
-								if(deathYear != null) {
-									statement.setInt(4, deathYear);
+								statement.setString(1, author.getName());
+								statement.setString(2, author.getSurname());
+								statement.setInt(3, author.getBirthYear());
+								if(author.getDeathYear() != null) {
+									statement.setInt(4, author.getDeathYear());
 								} else {
 									statement.setNull(4, Types.INTEGER);
 								}
@@ -112,6 +123,9 @@ public class Main {
 								resultSet = statement.getGeneratedKeys(); // receiving of all generated primary keys
 								resultSet.next();
 								System.out.printf("Author successfully added with identifier [%04d]\n", resultSet.getInt(1));
+								/* End of block for saving information into database */
+							} catch(EntityValidationException e) {
+								System.out.println(e.getMessage());
 							} catch(SQLException e) {
 								System.out.println("Error working with database");
 								e.printStackTrace();
