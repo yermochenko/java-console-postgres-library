@@ -10,7 +10,7 @@ abstract public class AuthorMenuItem extends NamedMenuItem {
 		this.authorDatabaseMapper = authorDatabaseMapper;
 	}
 
-	protected AuthorDatabaseMapper getAuthorDatabaseMapper() {
+	protected final AuthorDatabaseMapper getAuthorDatabaseMapper() {
 		return authorDatabaseMapper;
 	}
 }

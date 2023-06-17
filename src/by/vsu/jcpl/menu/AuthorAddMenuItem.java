@@ -5,7 +5,6 @@ import by.vsu.jcpl.orm.AuthorDatabaseMapper;
 import by.vsu.jcpl.EntityValidationException;
 
 import java.sql.SQLException;
-import java.util.Scanner;
 
 public class AuthorAddMenuItem extends AuthorMenuItem {
 	public AuthorAddMenuItem(String title, AuthorDatabaseMapper authorDatabaseMapper) {
@@ -14,7 +13,6 @@ public class AuthorAddMenuItem extends AuthorMenuItem {
 
 	@Override
 	public boolean activate() throws SQLException, EntityValidationException {
-		Scanner console = new Scanner(System.in);
 		System.out.println("\n==<[ ADDING OF NEW AUTHOR ]>==\n");
 		Author author = new Author();
 		System.out.print("Enter author's name: ");
@@ -51,7 +49,7 @@ public class AuthorAddMenuItem extends AuthorMenuItem {
 			throw new EntityValidationException("Birth year should be earlier than death year");
 		}
 		Integer id = getAuthorDatabaseMapper().create(author);
-		System.out.printf("Author successfully added with identifier [%04d]\n", id);
+		System.out.printf("Author was successfully added with identifier [%04d]\n", id);
 		return true;
 	}
 }

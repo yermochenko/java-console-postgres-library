@@ -9,7 +9,7 @@ abstract public class EntityDatabaseMapper {
 		this.connection = connection;
 	}
 
-	protected Connection getConnection() {
+	protected final Connection getConnection() {
 		return connection;
 	}
 }

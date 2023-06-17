@@ -2,6 +2,7 @@ package by.vsu.jcpl;
 
 import by.vsu.jcpl.menu.*;
 import by.vsu.jcpl.orm.AuthorDatabaseMapper;
+import by.vsu.jcpl.orm.BookDatabaseMapper;
 
 import java.sql.*;
 import java.util.*;
@@ -14,10 +15,15 @@ public class Main {
 			connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/book_catalog_db", "root", "root");
 			System.out.println("Connecting to database establish successfully");
 			AuthorDatabaseMapper authorDatabaseMapper = new AuthorDatabaseMapper(connection);
+			BookDatabaseMapper bookDatabaseMapper = new BookDatabaseMapper(connection, authorDatabaseMapper);
 			List<MenuItem> menuItems = new ArrayList<>();
+			menuItems.add(new BookListMenuItem("Reading of books list of given author", bookDatabaseMapper));
+			menuItems.add(new BookAddMenuItem("Adding of new book", bookDatabaseMapper));
+			menuItems.add(new BookEditMenuItem("Editing information about book", bookDatabaseMapper));
+			menuItems.add(new BookDeleteMenuItem("Deleting information about book", bookDatabaseMapper));
 			menuItems.add(new AuthorListMenuItem("Reading of authors list", authorDatabaseMapper));
 			menuItems.add(new AuthorAddMenuItem("Adding of new author", authorDatabaseMapper));
-			menuItems.add(new AuthorEditMenuItem("Updating information about author", authorDatabaseMapper));
+			menuItems.add(new AuthorEditMenuItem("Editing information about author", authorDatabaseMapper));
 			menuItems.add(new AuthorDeleteMenuItem("Deleting information about author", authorDatabaseMapper));
 			menuItems.add(new ExitMenuItem("Exit"));
 			int width = menuItems.stream().map(item -> item.title().length()).max(Integer::compareTo).get();
