@@ -26,6 +26,7 @@ public class BookDatabaseMapper extends EntityDatabaseMapper {
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
 		try {
+			getConnection().setAutoCommit(false);
 			statement = getConnection().prepareStatement(sql);
 			if(authorId != null) {
 				statement.setInt(1, authorId);
@@ -39,10 +40,15 @@ public class BookDatabaseMapper extends EntityDatabaseMapper {
 			for(Book book : books) {
 				restoreReferences(book, authors);
 			}
+			getConnection().commit();
 			return books;
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
 			try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
 			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
 	}
 
@@ -51,6 +57,7 @@ public class BookDatabaseMapper extends EntityDatabaseMapper {
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
 		try {
+			getConnection().setAutoCommit(false);
 			statement = getConnection().prepareStatement(sql);
 			statement.setInt(1, id);
 			resultSet = statement.executeQuery();
@@ -61,55 +68,78 @@ public class BookDatabaseMapper extends EntityDatabaseMapper {
 			if(book != null) {
 				restoreReferences(book, readAuthors());
 			}
+			getConnection().commit();
 			return book;
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
 			try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
 			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
 	}
 
 	public Integer create(Book book) throws SQLException {
 		String sql = "INSERT INTO \"book\" (\"title\", \"year\") VALUES (?, ?)";
-		PreparedStatement statement = null;
-		ResultSet resultSet = null;
-		Integer id;
 		try {
-			statement = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			fillStatement(statement, book);
-			statement.executeUpdate();
-			resultSet = statement.getGeneratedKeys();
-			resultSet.next();
-			id = resultSet.getInt(1);
+			getConnection().setAutoCommit(false);
+			PreparedStatement statement = null;
+			ResultSet resultSet = null;
+			Integer id;
+			try {
+				statement = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+				fillStatement(statement, book);
+				statement.executeUpdate();
+				resultSet = statement.getGeneratedKeys();
+				resultSet.next();
+				id = resultSet.getInt(1);
+			} finally {
+				try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
+				try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			}
+			updateAuthorIds(id, book.getAuthors().stream().map(Entity::getId).collect(Collectors.toSet()), Operation.INSERT);
+			getConnection().commit();
+			return id;
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
-			try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
-			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
-		updateAuthorIds(id, book.getAuthors().stream().map(Entity::getId).collect(Collectors.toSet()), Operation.INSERT);
-		return id;
 	}
 
 	public void update(Book book) throws SQLException {
 		String sql = "UPDATE \"book\" SET \"title\" = ?, \"year\" = ? WHERE \"id\" = ?";
-		PreparedStatement statement = null;
 		try {
-			statement = getConnection().prepareStatement(sql);
-			fillStatement(statement, book);
-			statement.setInt(3, book.getId());
-			statement.executeUpdate();
+			getConnection().setAutoCommit(false);
+			PreparedStatement statement = null;
+			try {
+				statement = getConnection().prepareStatement(sql);
+				fillStatement(statement, book);
+				statement.setInt(3, book.getId());
+				statement.executeUpdate();
+			} finally {
+				try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			}
+			Set<Integer> oldAuthorIds = readAuthorIdsByBook(book.getId());
+			Set<Integer> newAuthorIds = book.getAuthors().stream().map(Entity::getId).collect(Collectors.toSet());
+			if(!oldAuthorIds.equals(newAuthorIds)) {
+				Set<Integer> nonChangedAuthorIds = new LinkedHashSet<>(oldAuthorIds);
+				nonChangedAuthorIds.retainAll(newAuthorIds);
+				Set<Integer> removingAuthorIds = new LinkedHashSet<>(oldAuthorIds);
+				removingAuthorIds.removeAll(nonChangedAuthorIds);
+				Set<Integer> addingAuthorIds = new LinkedHashSet<>(newAuthorIds);
+				addingAuthorIds.removeAll(nonChangedAuthorIds);
+				updateAuthorIds(book.getId(), removingAuthorIds, Operation.DELETE);
+				updateAuthorIds(book.getId(), addingAuthorIds, Operation.INSERT);
+			}
+			getConnection().commit();
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
-			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
-		}
-		Set<Integer> oldAuthorIds = readAuthorIdsByBook(book.getId());
-		Set<Integer> newAuthorIds = book.getAuthors().stream().map(Entity::getId).collect(Collectors.toSet());
-		if(!oldAuthorIds.equals(newAuthorIds)) {
-			Set<Integer> nonChangedAuthorIds = new LinkedHashSet<>(oldAuthorIds);
-			nonChangedAuthorIds.retainAll(newAuthorIds);
-			Set<Integer> removingAuthorIds = new LinkedHashSet<>(oldAuthorIds);
-			removingAuthorIds.removeAll(nonChangedAuthorIds);
-			Set<Integer> addingAuthorIds = new LinkedHashSet<>(newAuthorIds);
-			addingAuthorIds.removeAll(nonChangedAuthorIds);
-			updateAuthorIds(book.getId(), removingAuthorIds, Operation.DELETE);
-			updateAuthorIds(book.getId(), addingAuthorIds, Operation.INSERT);
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
 	}
 
@@ -117,11 +147,17 @@ public class BookDatabaseMapper extends EntityDatabaseMapper {
 		String sql = "DELETE FROM \"book\" WHERE \"id\" = ?";
 		PreparedStatement statement = null;
 		try {
+			getConnection().setAutoCommit(false);
 			statement = getConnection().prepareStatement(sql);
 			statement.setInt(1, id);
 			statement.executeUpdate();
+			getConnection().commit();
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
 			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
 	}
 

@@ -17,16 +17,22 @@ public class AuthorDatabaseMapper extends EntityDatabaseMapper {
 		Statement statement = null;
 		ResultSet resultSet = null;
 		try {
+			getConnection().setAutoCommit(false);
 			statement = getConnection().createStatement();
 			resultSet = statement.executeQuery(sql);
 			List<Author> authors = new ArrayList<>();
 			while(resultSet.next()) {
 				authors.add(parseResultSet(resultSet));
 			}
+			getConnection().commit();
 			return authors;
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
 			try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
 			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
 	}
 
@@ -35,17 +41,23 @@ public class AuthorDatabaseMapper extends EntityDatabaseMapper {
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
 		try {
+			getConnection().setAutoCommit(false);
 			statement = getConnection().prepareStatement(sql);
 			statement.setInt(1, id);
 			resultSet = statement.executeQuery();
+			Author author = null;
 			if(resultSet.next()) {
-				return parseResultSet(resultSet);
-			} else {
-				return null;
+				author = parseResultSet(resultSet);
 			}
+			getConnection().commit();
+			return author;
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
 			try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
 			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
 	}
 
@@ -54,15 +66,22 @@ public class AuthorDatabaseMapper extends EntityDatabaseMapper {
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
 		try {
+			getConnection().setAutoCommit(false);
 			statement = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			fillStatement(statement, author);
 			statement.executeUpdate();
 			resultSet = statement.getGeneratedKeys(); // receiving of all generated primary keys
 			resultSet.next();
-			return resultSet.getInt(1);
+			Integer id = resultSet.getInt(1);
+			getConnection().commit();
+			return id;
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
 			try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
 			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
 	}
 
@@ -70,12 +89,18 @@ public class AuthorDatabaseMapper extends EntityDatabaseMapper {
 		String sql = "UPDATE \"author\" SET \"name\" = ?, \"surname\" = ?, \"birth_year\" = ?, \"death_year\" = ? WHERE \"id\" = ?";
 		PreparedStatement statement = null;
 		try {
+			getConnection().setAutoCommit(false);
 			statement = getConnection().prepareStatement(sql);
 			fillStatement(statement, author);
 			statement.setInt(5, author.getId());
 			statement.executeUpdate();
+			getConnection().commit();
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
 			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
 	}
 
@@ -83,11 +108,17 @@ public class AuthorDatabaseMapper extends EntityDatabaseMapper {
 		String sql = "DELETE FROM \"author\" WHERE \"id\" = ?";
 		PreparedStatement statement = null;
 		try {
+			getConnection().setAutoCommit(false);
 			statement = getConnection().prepareStatement(sql);
 			statement.setInt(1, id);
 			statement.executeUpdate();
+			getConnection().commit();
+		} catch(SQLException e) {
+			try { getConnection().rollback(); } catch(SQLException ignored) {}
+			throw e;
 		} finally {
 			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { getConnection().setAutoCommit(true); } catch(SQLException ignored) {}
 		}
 	}
 
